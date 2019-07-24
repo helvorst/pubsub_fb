@@ -1,4 +1,4 @@
-exports.pubsubconfig = {
+module.exports.pubsubconfig = {
     topic: {
         inbox: {
             name: "monpay-in",

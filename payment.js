@@ -1,6 +1,6 @@
-const fbcnt = require('./firebaseController');
+const fbcnt = require('./fb/fbCnt');
 
-module.exports.payment = async function(id, data, attrs) {
+module.exports.makePayment = async function(id, data, attrs) {
     const uid = attrs.user;
     const sum = data.sum;
     const monster = data.monster;
@@ -12,7 +12,7 @@ module.exports.payment = async function(id, data, attrs) {
 
     const col = `transactions/${uid}/tids`;
     const respData = {
-        mes: `Hello, transaction ${tid} processed! You'll get ${sum} for ${monster}.`
+        message: `Hello, transaction ${tid} processed! You'll get ${sum} for ${monster}`
     }
 
     // create record in fb

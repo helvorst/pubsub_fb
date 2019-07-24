@@ -1,8 +1,7 @@
-const { projectconfig } = require('./projectconfig');
-const { pubsubconfig } = require('./pubsubconfig');
+const { pubsubconfig } = require('./config');
 const { createTopic, publishToTopic } = require('./topic');
 const { createSubscription, listenForMessages } = require('./subscription')
-const { payment } = require('./payment');
+const { makePayment } = require('../payment');
 
 // The worker function is meant to be non-blocking. It starts a long-
 // running process, such as writing the message to a table, which may
@@ -10,19 +9,24 @@ const { payment } = require('./payment');
 async function onMessage(message) {
     try {
         console.log(`Received message id: ${message.id}:`);
-        console.log(`\tData: ${JSON.stringify(message.data)}`);
+        const buffer = Buffer.from(message.data, 'base64');
+        const data = JSON.parse(buffer.toString());
+        console.log(`\tData: ${JSON.stringify(data)}`);
         console.log(`\tAttributes: ${JSON.stringify(message.attributes)}`);
 
+        try {
+            const tid = await makePayment(message.id, data, message.attributes);
+            await onResponse({ tid: tid }, { originalMessageId: message.id });
+            message.ack();
+            console.log(`Finished procesing: ${message.id}`);
 
-        const tid = await payment(message.id, message.data, message.attributes);
-        await onResponse({tid: tid});
+        } catch (e) {
+            console.error(`Can't make payment`);
+        }
+
+    } catch (error) {
+        console.error('Can\'t parse message');
         message.ack();
-
-        console.log(`Finished procesing: ${message.id}`);
-
-
-    } catch (e) {
-        console.error(e);
     }
 }
 
@@ -48,7 +52,7 @@ async function prepareOutbox() {
 }
 
 
-async function start() {
+async function run() {
     try {
         await prepareInbox();
         await prepareOutbox();
@@ -62,5 +66,5 @@ async function start() {
     }
 }
 
-module.exports.pubsubrun = start;
+module.exports.run = run;
 //

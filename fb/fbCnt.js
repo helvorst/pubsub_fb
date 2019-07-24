@@ -1,10 +1,13 @@
 const fb = require('firebase-admin');
-var serviceAccount = require("./f1-yt-309bd-firebase-adminsdk-zt8ca-3fdc7bcc59.json");
+const key = require("./key.json");
+const {firebaseConfig} = require('./config');
 
 fb.initializeApp({
-  credential: fb.credential.cert(serviceAccount),
-  databaseURL: "https://f1-yt-309bd.firebaseio.com"
+  credential: fb.credential.cert(key),
+  databaseURL: firebaseConfig.databaseURL
 });
+
+console.log(`fb initialized for project id: ${firebaseConfig.projectId}, databaseUrl: ${firebaseConfig.databaseURL}`);
 
 module.exports.create = async function(col, data) {
     console.log(`adding new item to fb collection ${col}: ${data}`);

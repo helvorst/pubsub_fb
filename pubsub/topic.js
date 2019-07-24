@@ -5,7 +5,7 @@ module.exports.createTopic = async function createTopic(topicName) {
     try {
         await pubsub.createTopic(topicName);
     } catch (e) {
-        console.warn(e);
+        console.warn(e.details);
     }
 }
 
